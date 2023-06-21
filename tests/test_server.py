@@ -48,27 +48,62 @@ class MockCompetition:
         return
 
 
-def test_should_check_max_input(mocker, client):
+@pytest.fixture
+def club():
     club = {
         "name": "Club Mock",
         "email": "Email Mock",
         "points": "5"
     }
+    return club
+
+
+@pytest.fixture
+def competition():
     competition = {
         "name": "Competition Mock",
         "date": "2020-10-22 13:30:00",
         "numberOfPlaces": "25"
     }
-    mock_clubs = [club]
-    mock_competitions = [competition]
-    mocker.patch.object(server, 'clubs', mock_clubs)
-    mocker.patch.object(server, 'competitions', mock_competitions)
+    return competition
+
+@pytest.fixture
+def competitions(competition):
+    competitions = [competition]
+    return competitions
+
+
+@pytest.fixture
+def clubs(club):
+    clubs = [club]
+    return clubs
+
+
+def test_should_check_max_input(mocker, client, club, competition, clubs, competitions):
+    mocker.patch.object(server, 'clubs', clubs)
+    mocker.patch.object(server, 'competitions', competitions)
+    print(club)
+    print(clubs)
 
     response = client.get(f'/book/{competition["name"]}/{club["name"]}')
     response_soup = BeautifulSoup(response.data.decode(), 'html.parser')
     input_field = response_soup.find("input", {"name": "places"})
     input_max_places = input_field.attrs["max"]
-
+    print(input_max_places)
     expected_result = 5
 
     assert int(input_max_places) == expected_result
+
+
+def test_should_validate_point_substraction(mocker, client, club, competition, clubs, competitions):
+
+    mocker.patch.object(server, 'clubs', clubs)
+    mocker.patch.object(server, 'competitions', competitions)
+    response = client.post('/purchasePlaces', data={
+        "places": "5",
+        "competition": competition["name"],
+        "club": club["name"],
+    })
+    print(response.data.decode())
+    expected_result = 0
+    assert int(club["points"]) == expected_result
