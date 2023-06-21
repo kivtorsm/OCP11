@@ -1,10 +1,8 @@
-import sys
-import os
 import pytest
 
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-sys.path.append(parent)
+from bs4 import BeautifulSoup
+
+import server
 
 
 @pytest.mark.parametrize("email", ['admin@irontemple.com', 'false@adress.com'])
@@ -17,9 +15,9 @@ def test_should_status_code_200(client, email):
 
 
 def test_should_show_error(client):
-    '''
+    """
     Tests an error is shown if email provided is unknown.
-    '''
+    """
     email = 'false@adress.com'
     response = client.post('/showSummary', data={
         'email': email
@@ -44,3 +42,33 @@ def test_should_raise_index_error2(client):
     })
 
 
+class MockCompetition:
+    @staticmethod
+    def get_info():
+        return
+
+
+def test_should_check_max_input(mocker, client):
+    club = {
+        "name": "Club Mock",
+        "email": "Email Mock",
+        "points": "5"
+    }
+    competition = {
+        "name": "Competition Mock",
+        "date": "2020-10-22 13:30:00",
+        "numberOfPlaces": "25"
+    }
+    mock_clubs = [club]
+    mock_competitions = [competition]
+    mocker.patch.object(server, 'clubs', mock_clubs)
+    mocker.patch.object(server, 'competitions', mock_competitions)
+
+    response = client.get(f'/book/{competition["name"]}/{club["name"]}')
+    response_soup = BeautifulSoup(response.data.decode(), 'html.parser')
+    input_field = response_soup.find("input", {"name": "places"})
+    input_max_places = input_field.attrs["max"]
+
+    expected_result = 5
+
+    assert int(input_max_places) == expected_result
