@@ -1,5 +1,12 @@
 import json
+import sys
+import os
 from flask import Flask, render_template, request, redirect, flash, url_for
+
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
 
 
 def loadClubs():
@@ -63,6 +70,7 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    club['points'] = int(club['points'])-placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
 
