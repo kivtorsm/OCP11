@@ -33,12 +33,6 @@ def test_should_raise_index_error():
         club = server.get_club_by_email(email)
 
 
-class MockCompetition:
-    @staticmethod
-    def get_info():
-        return
-
-
 @pytest.fixture
 def club():
     club = {
@@ -57,6 +51,7 @@ def competition():
         "numberOfPlaces": "25"
     }
     return competition
+
 
 @pytest.fixture
 def competitions(competition):
