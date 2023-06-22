@@ -29,18 +29,40 @@ def test_should_show_error(client):
 def test_should_raise_index_error():
     email = 'false@adress.com'
     with pytest.raises(IndexError):
-        #raise IndexError
         club = server.get_club_by_email(email)
 
 
 @pytest.fixture
-def club():
-    club = {
+def club(request):
+    clubs = [{
         "name": "Club Mock",
         "email": "Email Mock",
         "points": "5"
+    },
+    {
+        "name": "Club Mock",
+        "email": "Email Mock",
+        "points": "13"
+    }
+    ]
+    return clubs[request.param]
+
+
+@pytest.fixture
+def club2():
+    club = {
+        "name": "Club Mock",
+        "email": "Email Mock",
+        "points": "13"
     }
     return club
+
+
+@pytest.fixture
+@pytest.mark.parametrize("club", [0, 1], indirect=True)
+def clubs(club):
+    clubs = [club]
+    return clubs
 
 
 @pytest.fixture
@@ -59,12 +81,7 @@ def competitions(competition):
     return competitions
 
 
-@pytest.fixture
-def clubs(club):
-    clubs = [club]
-    return clubs
-
-
+@pytest.mark.parametrize("club", [0, 1], indirect=True)
 def test_should_check_max_input(mocker, client, club, competition, clubs, competitions):
     mocker.patch.object(server, 'clubs', clubs)
     mocker.patch.object(server, 'competitions', competitions)
@@ -74,14 +91,16 @@ def test_should_check_max_input(mocker, client, club, competition, clubs, compet
     response = client.get(f'/book/{competition["name"]}/{club["name"]}')
     response_soup = BeautifulSoup(response.data.decode(), 'html.parser')
     input_field = response_soup.find("input", {"name": "places"})
+    print(input_field)
     input_max_places = input_field.attrs["max"]
     print(input_max_places)
-    expected_result = int(club['points'])
+    expected_result = min(12, int(club['points']))
 
     assert int(input_max_places) == expected_result
 
 
-def test_should_validate_point_substraction(mocker, client, club, competition, clubs, competitions):
+@pytest.mark.parametrize("club", [0], indirect=True)
+def test_should_validate_point_and_places_substraction(mocker, client, club, competition, clubs, competitions):
 
     mocker.patch.object(server, 'clubs', clubs)
     mocker.patch.object(server, 'competitions', competitions)
@@ -163,7 +182,6 @@ def test_should_check_max_input(mocker, client, club, competition, clubs, compet
 
 @pytest.mark.parametrize("club", [0], indirect=True)
 def test_should_validate_point_and_places_substraction(mocker, client, club, competition, clubs, competitions):
-
     mocker.patch.object(server, 'clubs', clubs)
     mocker.patch.object(server, 'competitions', competitions)
     response = client.post('/purchasePlaces', data={
