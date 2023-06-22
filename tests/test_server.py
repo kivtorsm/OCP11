@@ -2,6 +2,8 @@ import sys
 import os
 import pytest
 
+import server
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
@@ -28,19 +30,10 @@ def test_should_show_error(client):
     assert expected_value in response.data.decode()
 
 
-def test_should_raise_index_error(client):
+def test_should_raise_index_error():
     email = 'false@adress.com'
     with pytest.raises(IndexError):
-        client.post('/showSummary', data={
-            'email': email
-        })
-
-
-@pytest.mark.xfail(raises=IndexError)
-def test_should_raise_index_error2(client):
-    email = 'false@adress.com'
-    client.post('/showSummary', data={
-        'email': email
-    })
+        #raise IndexError
+        club = server.get_club_by_email(email)
 
 

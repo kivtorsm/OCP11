@@ -26,13 +26,22 @@ def index():
     return render_template('index.html')
 
 
+def get_club_by_email(email):
+    # try:
+        club = [club for club in clubs if club['email'] == email][0]
+        return club
+    # except IndexError:
+    #     pass
+
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
     try:
-        club = [club for club in clubs if club['email'] == request.form['email']][0]
+    # raise IndexError
+    # club = [club for club in clubs if club['email'] == request.form['email']][0]
+        club = get_club_by_email(request.form['email'])
         return render_template('welcome.html', club=club, competitions=competitions)
     except IndexError as err:
-        # raise IndexError
+    #     # raise IndexError
         error = 'The email address provided does not exist'
         return render_template('index.html', error=error)
 
