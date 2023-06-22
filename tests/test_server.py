@@ -81,7 +81,7 @@ def test_should_check_max_input(mocker, client, club, competition, clubs, compet
     input_field = response_soup.find("input", {"name": "places"})
     input_max_places = input_field.attrs["max"]
     print(input_max_places)
-    expected_result = 5
+    expected_result = int(club['points'])
 
     assert int(input_max_places) == expected_result
 
@@ -98,3 +98,4 @@ def test_should_validate_point_substraction(mocker, client, club, competition, c
     print(response.data.decode())
     expected_result = 0
     assert int(club["points"]) == expected_result
+
