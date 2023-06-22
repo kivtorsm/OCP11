@@ -162,7 +162,7 @@ def test_should_check_max_input(mocker, client, club, competition, clubs, compet
 
 
 @pytest.mark.parametrize("club", [0], indirect=True)
-def test_should_validate_point_substraction(mocker, client, club, competition, clubs, competitions):
+def test_should_validate_point_and_places_substraction(mocker, client, club, competition, clubs, competitions):
 
     mocker.patch.object(server, 'clubs', clubs)
     mocker.patch.object(server, 'competitions', competitions)
@@ -172,9 +172,7 @@ def test_should_validate_point_substraction(mocker, client, club, competition, c
         "club": club["name"],
     })
     print(response.data.decode())
-    expected_result = 0
-    assert int(club["points"]) == expected_result
-
-
-def test_12_places_maximum_purchase(client):
-    pass
+    expected_result_points = 0
+    expected_result_places = 20
+    assert int(club["points"]) == expected_result_points
+    assert int(competition["numberOfPlaces"]) == expected_result_places
