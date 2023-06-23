@@ -62,6 +62,7 @@ def book(competition, club):
     competition_datetime_date = datetime.strptime(foundCompetition['date'], "%Y-%m-%d %H:%M:%S")
     competition_is_not_finished = competition_datetime_date > datetime.now()
     if competition_is_not_finished:
+        flash("Perfect. Go on.")
         return render_template('booking.html', club=foundClub, competition=foundCompetition, max_places=max_places)
     else:
         flash("You can't book events in the past")
