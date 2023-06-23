@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
 
 
@@ -58,10 +59,12 @@ def book(competition, club):
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
     max_places = min(12, int(foundClub["points"]))
-    if foundClub and foundCompetition:
+    competition_datetime_date = datetime.strptime(foundCompetition['date'], "%Y-%m-%d %H:%M:%S")
+    competition_is_not_finished = competition_datetime_date > datetime.now()
+    if competition_is_not_finished:
         return render_template('booking.html', club=foundClub, competition=foundCompetition, max_places=max_places)
     else:
-        flash("Something went wrong-please try again")
+        flash("You can't book events in the past")
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
