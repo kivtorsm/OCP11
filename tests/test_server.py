@@ -6,6 +6,11 @@ from bs4 import BeautifulSoup
 import server
 
 
+def mocker_clubs_and_competitions(mocker, clubs, competitions):
+    mocker.patch.object(server, 'clubs', clubs)
+    mocker.patch.object(server, 'competitions', competitions)
+
+
 class TestShowSummary:
     @pytest.mark.parametrize("email", ['admin@irontemple.com', 'false@adress.com'])
     def test_should_status_code_200_and_error_message_if_unknown_email(self, client, email):
@@ -17,6 +22,15 @@ class TestShowSummary:
         if email == 'false@adress.com':
             assert 'The email address provided does not exist' in response.data.decode()
 
+    def test_should_show_club_table_with_data(self, client, mocker, clubs, competitions):
+        mocker_clubs_and_competitions(mocker, clubs, competitions)
+        email = 'Email Mock'
+        response = client.post('/showSummary', data={
+            'email': email
+        })
+        assert clubs[0]['name'] in response.data.decode()
+        assert clubs[1]['name'] in response.data.decode()
+
 
 def test_should_raise_index_error():
     email = 'false@adress.com'
@@ -25,45 +39,44 @@ def test_should_raise_index_error():
 
 
 @pytest.fixture
-def club(request):
-    clubs = [{
-        "name": "Club Mock",
-        "email": "Email Mock",
-        "points": "5"
-    }, {
-        "name": "Club Mock",
-        "email": "Email Mock",
-        "points": "13"
-    }
-    ]
+def club(request, clubs):
     return clubs[request.param]
 
 
 @pytest.fixture
 @pytest.mark.parametrize("club", [0, 1], indirect=['club'])
-def clubs(club):
-    clubs = [club]
+def clubs():
+    clubs = [{
+        "name": "Club Mock 1",
+        "email": "Email Mock",
+        "points": "5"
+    }, {
+        "name": "Club Mock 2",
+        "email": "Email Mock",
+        "points": "13"
+    }
+    ]
     return clubs
 
 
 @pytest.fixture
-def competition(request):
-    competitions = [{
-        "name": "Competition Mock",
-        "date": "2020-10-22 13:30:00",
-        "numberOfPlaces": "25"
-    }, {
-        "name": "Competition Mock",
-        "date": "2024-10-22 13:30:00",
-        "numberOfPlaces": "24"
-    }]
+def competition(request, competitions):
+
     return competitions[request.param]
 
 
 @pytest.fixture
 @pytest.mark.parametrize("competition", [0, 1], indirect=['competition'])
-def competitions(competition):
-    competitions = [competition]
+def competitions():
+    competitions = [{
+        "name": "Competition Mock 1",
+        "date": "2020-10-22 13:30:00",
+        "numberOfPlaces": "25"
+    }, {
+        "name": "Competition Mock 2",
+        "date": "2024-10-22 13:30:00",
+        "numberOfPlaces": "24"
+    }]
     return competitions
 
 
@@ -82,7 +95,7 @@ def test_should_validate_point_and_places_substraction(mocker, client, club, com
     assert int(competition["numberOfPlaces"]) == expected_result_places
 
 
-class TestBook():
+class TestBook:
     @pytest.mark.parametrize("club,competition", [(0, 1), (1, 1)], indirect=['club', 'competition'])
     def test_should_check_max_input(self, mocker, client, club, competition, clubs, competitions):
         mocker.patch.object(server, 'clubs', clubs)
