@@ -51,7 +51,7 @@ The app is powered by [JSON files](https://www.tutorialspoint.com/json/json_quic
 ### Performance testing : 
 - we used locust and tested a load of 6 parallel users.
 - Performance testing conf file saved in `tests/performance_tests/locustfile.py`
-- 
+
 
 
 
